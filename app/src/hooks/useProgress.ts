@@ -1,25 +1,23 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import type { ModuleStatus } from '../data/modules'
 
-const KEY = 'dca_progress'
-
-function load(): Record<string, ModuleStatus> {
-  try {
-    return JSON.parse(localStorage.getItem(KEY) ?? '{}')
-  } catch {
-    return {}
-  }
-}
-
 export function useProgress() {
-  const [progress, setProgress] = useState<Record<string, ModuleStatus>>(load)
+  const [progress, setProgress] = useState<Record<string, ModuleStatus>>({})
+
+  useEffect(() => {
+    fetch('/api/progress')
+      .then(r => r.json())
+      .then(setProgress)
+      .catch(() => {})
+  }, [])
 
   const setStatus = useCallback((id: string, status: ModuleStatus) => {
-    setProgress(prev => {
-      const next = { ...prev, [id]: status }
-      localStorage.setItem(KEY, JSON.stringify(next))
-      return next
-    })
+    setProgress(prev => ({ ...prev, [id]: status }))
+    fetch(`/api/progress/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    }).catch(() => {})
   }, [])
 
   const completedCount = Object.values(progress).filter(s => s === 'done').length

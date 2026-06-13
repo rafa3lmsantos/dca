@@ -1,0 +1,12 @@
+{
+  "name": "dca-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --experimental-sqlite index.js",
+    "dev": "node --experimental-sqlite --watch index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.1"
+  }
+}

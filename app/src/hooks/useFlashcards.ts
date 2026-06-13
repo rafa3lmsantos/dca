@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 
 export interface Flashcard {
   id: string
@@ -9,63 +9,49 @@ export interface Flashcard {
   wrong: number
 }
 
-function storageKey(moduleId: string) {
-  return `dca_flashcards_${moduleId}`
-}
-
-function load(moduleId: string): Flashcard[] {
-  try {
-    return JSON.parse(localStorage.getItem(storageKey(moduleId)) ?? '[]')
-  } catch {
-    return []
-  }
-}
-
 export function useFlashcards(moduleId: string) {
-  const [cards, setCards] = useState<Flashcard[]>(() => load(moduleId))
+  const [cards, setCards] = useState<Flashcard[]>([])
 
-  const save = useCallback((next: Flashcard[]) => {
-    localStorage.setItem(storageKey(moduleId), JSON.stringify(next))
-    setCards(next)
+  useEffect(() => {
+    fetch(`/api/flashcards/${moduleId}`)
+      .then(r => r.json())
+      .then(setCards)
+      .catch(() => {})
   }, [moduleId])
 
   const addCards = useCallback((incoming: Omit<Flashcard, 'id' | 'correct' | 'wrong'>[]) => {
-    setCards(prev => {
-      const next = [
-        ...prev,
-        ...incoming.map(c => ({
-          ...c,
-          id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-          correct: 0,
-          wrong: 0,
-        })),
-      ]
-      localStorage.setItem(storageKey(moduleId), JSON.stringify(next))
-      return next
-    })
+    const withIds = incoming.map(c => ({
+      ...c,
+      id: crypto.randomUUID(),
+      correct: 0,
+      wrong: 0,
+    }))
+    setCards(prev => [...prev, ...withIds])
+    fetch(`/api/flashcards/${moduleId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(withIds),
+    }).catch(() => {})
   }, [moduleId])
 
   const markResult = useCallback((id: string, result: 'correct' | 'wrong') => {
-    setCards(prev => {
-      const next = prev.map(c =>
-        c.id === id ? { ...c, [result]: c[result] + 1 } : c
-      )
-      localStorage.setItem(storageKey(moduleId), JSON.stringify(next))
-      return next
-    })
-  }, [moduleId])
+    setCards(prev => prev.map(c => c.id === id ? { ...c, [result]: c[result] + 1 } : c))
+    fetch(`/api/flashcards/${id}/result`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ correct: result === 'correct' }),
+    }).catch(() => {})
+  }, [])
 
   const removeCard = useCallback((id: string) => {
-    setCards(prev => {
-      const next = prev.filter(c => c.id !== id)
-      localStorage.setItem(storageKey(moduleId), JSON.stringify(next))
-      return next
-    })
-  }, [moduleId])
+    setCards(prev => prev.filter(c => c.id !== id))
+    fetch(`/api/flashcards/${id}`, { method: 'DELETE' }).catch(() => {})
+  }, [])
 
   const clearCards = useCallback(() => {
-    save([])
-  }, [save])
+    setCards([])
+    fetch(`/api/flashcards/${moduleId}/all`, { method: 'DELETE' }).catch(() => {})
+  }, [moduleId])
 
   return { cards, addCards, markResult, removeCard, clearCards }
 }

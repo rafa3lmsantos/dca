@@ -6,8 +6,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   base: '/dca/',
   server: {
-    fs: {
-      allow: ['..'],
-    },
+    fs: { allow: ['..'] },
+    proxy: { '/api': 'http://localhost:3001' },
   },
 })

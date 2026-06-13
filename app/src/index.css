@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --color-dt-blue: #1a8cff;
+  --color-dt-dark: #0d1117;
+  --color-dt-surface: #161b22;
+  --color-dt-border: #21262d;
+  --color-dt-text: #c9d1d9;
+  --color-dt-muted: #8b949e;
+}
+
+body {
+  margin: 0;
+  background: #0d1117;
+  color: #c9d1d9;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Flashcard 3D flip */
+.fc-container { perspective: 1200px; }
+.fc-inner {
+  position: relative;
+  width: 100%;
+  transform-style: preserve-3d;
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.fc-inner.is-flipped { transform: rotateY(180deg); }
+.fc-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.fc-back { transform: rotateY(180deg); }
+@media (prefers-reduced-motion: reduce) {
+  .fc-inner { transition: none; }
+}
+
+/* Markdown content styling */
+.prose-dt h1, .prose-dt h2, .prose-dt h3 { color: #e6edf3; font-weight: 600; margin: 1.2em 0 0.5em; }
+.prose-dt h1 { font-size: 1.6rem; }
+.prose-dt h2 { font-size: 1.3rem; border-bottom: 1px solid #21262d; padding-bottom: 0.4em; }
+.prose-dt h3 { font-size: 1.1rem; }
+.prose-dt p { margin: 0.75em 0; line-height: 1.7; }
+.prose-dt ul, .prose-dt ol { padding-left: 1.5em; margin: 0.5em 0; }
+.prose-dt li { margin: 0.3em 0; }
+.prose-dt strong { color: #e6edf3; }
+.prose-dt code { background: #1f2937; color: #60a5fa; padding: 0.15em 0.4em; border-radius: 4px; font-size: 0.88em; }
+.prose-dt pre { background: #1f2937; padding: 1em; border-radius: 8px; overflow-x: auto; }
+.prose-dt pre code { background: none; padding: 0; }
+.prose-dt blockquote { border-left: 3px solid #1a8cff; padding-left: 1em; color: #8b949e; margin: 1em 0; }
+.prose-dt table { width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 0.9em; }
+.prose-dt th { background: #161b22; color: #e6edf3; padding: 0.6em 1em; text-align: left; border: 1px solid #21262d; }
+.prose-dt td { padding: 0.5em 1em; border: 1px solid #21262d; }
+.prose-dt tr:nth-child(even) td { background: #161b22; }
+.prose-dt a { color: #1a8cff; text-decoration: none; }
+.prose-dt a:hover { text-decoration: underline; }

@@ -1,0 +1,8 @@
+node_modules/
+app/dist/
+app/.env
+*.mp4
+.DS_Store
+Thumbs.db
+API Key.txt
+.claude/

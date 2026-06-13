@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Home } from './pages/Home'
 import { ModulePage } from './pages/ModulePage'
 import { Settings } from './pages/Settings'
+import { LoginPage } from './pages/LoginPage'
+import { isAuthed } from './lib/auth'
 
 type Page =
   | { name: 'home' }
@@ -9,7 +11,12 @@ type Page =
   | { name: 'settings' }
 
 export default function App() {
+  const [authed, setAuthed] = useState(isAuthed)
   const [page, setPage] = useState<Page>({ name: 'home' })
+
+  if (!authed) {
+    return <LoginPage onSuccess={() => setAuthed(true)} />
+  }
 
   return (
     <div className="min-h-screen bg-dt-dark flex flex-col">
